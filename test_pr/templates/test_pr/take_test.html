@@ -1,0 +1,243 @@
+{% extends 'test_pr/base.html' %}
+
+{% block title %}{{ test.title }} - Онлайн Тесты{% endblock %}
+
+{% block content %}
+<style>
+    .questions-container {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        padding: 30px;
+    }
+
+    .question-nav {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+    }
+
+    .question-nav-btn {
+        width: 45px;
+        height: 45px;
+        border-radius: 8px;
+        border: 2px solid var(--light-gray);
+        background: white;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        font-size: 0.9rem;
+    }
+
+    .question-nav-btn:hover {
+        border-color: var(--primary-color);
+        color: var(--primary-color);
+    }
+
+    .question-nav-btn.active {
+        background-color: var(--primary-color);
+        color: white;
+        border-color: var(--primary-color);
+    }
+
+    .question-nav-btn.answered {
+        background-color: var(--success-color);
+        color: white;
+        border-color: var(--success-color);
+    }
+
+    .questions-wrapper {
+        min-height: 400px;
+    }
+
+    .nav-buttons {
+        display: flex;
+        gap: 15px;
+        justify-content: space-between;
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid var(--light-gray);
+    }
+</style>
+
+{% if timer_seconds %}
+<div class="timer" id="timer">
+    <span id="timer-display">Осталось: {{ timer_minutes }}:00</span>
+</div>
+{% endif %}
+
+<div class="card" style="margin-bottom: 30px;">
+    <h1>{{ test.title }}</h1>
+    {% if test.description %}
+    <p style="color: var(--dark-gray); font-size: 1.1rem;">{{ test.description }}</p>
+    {% endif %}
+    <p style="color: var(--dark-gray); margin-top: 15px;">
+        Всего вопросов: <strong>{{ questions.count }}</strong>
+        {% if test.timer_minutes %}
+        | Время: <strong>{{ test.timer_minutes }} минут</strong>
+        {% endif %}
+    </p>
+</div>
+
+<form method="post" class="questions-container">
+    {% csrf_token %}
+
+    <!-- Навигация по вопросам -->
+    <div class="question-nav" id="question-nav">
+        {% for question in questions %}
+        <button type="button" class="question-nav-btn" data-question="{{ question.id }}">
+            {{ forloop.counter }}
+        </button>
+        {% endfor %}
+    </div>
+
+    <!-- Вопросы -->
+    <div class="questions-wrapper">
+        
+        {% for question in questions %}
+        <div class="question" id="question-{{ question.id }}" style="display: none;">
+            <div style="margin-bottom: 20px;">
+                <span class="question-number">{{ forloop.counter }}</span>
+                <span class="question-text">{{ question.text }}</span>
+            </div>
+
+            <div style="margin-left: 45px;">
+                {% for answer in question.answers.all %}
+                <div class="answer-option">
+                    <input 
+                        type="radio" 
+                        name="answer_{{ question.id }}" 
+                        value="{{ answer.id }}" 
+                        id="answer_{{ answer.id }}"
+                        class="answer-radio"
+                        data-question="{{ question.id }}"
+                    />
+                    <label for="answer_{{ answer.id }}">
+                        {{ answer.text }}
+                    </label>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Кнопки навигации -->
+    <div class="nav-buttons">
+        <button type="button" class="btn btn-secondary" id="prev-btn" style="display: none;">
+            ← Предыдущий
+        </button>
+        <button type="button" class="btn btn-secondary" id="next-btn">
+            Следующий →
+        </button>
+    </div>
+
+    <!-- Завершение теста -->
+    <div style="margin-top: 20px; text-align: center;">
+        <button type="submit" class="btn btn-success btn-block" id="submit-btn" style="display: none;">
+            Завершить тест
+        </button>
+    </div>
+</form>
+<script>
+    const questions = {{ questions.count }};
+    let currentQuestion = 0;
+    // Создаем массив ID вопросов
+    const questionIds = [
+        {% for question in questions %}
+            {{ question.id }}{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    ];
+
+    function showQuestion(index) {
+        // Скрываем все вопросы
+        document.querySelectorAll('.question').forEach(q => q.style.display = 'none');
+        
+        // Показываем текущий вопрос по его ID
+        const questionId = questionIds[currentQuestion];
+        const questionElement = document.getElementById('question-' + questionId);
+        if (questionElement) {
+            questionElement.style.display = 'block';
+        }
+        
+        // Обновляем активную кнопку навигации
+        document.querySelectorAll('.question-nav-btn').forEach((btn, i) => {
+            btn.classList.remove('active');
+            if (i === currentQuestion) {
+                btn.classList.add('active');
+            }
+        });
+
+        // Обновляем видимость кнопок навигации
+        document.getElementById('prev-btn').style.display = currentQuestion > 0 ? 'inline-block' : 'none';
+        document.getElementById('next-btn').style.display = currentQuestion < questions - 1 ? 'inline-block' : 'none';
+        document.getElementById('submit-btn').style.display = currentQuestion === questions - 1 ? 'block' : 'none';
+    }
+
+    // Отслеживание ответов
+    document.querySelectorAll('.answer-radio').forEach(radio => {
+        radio.addEventListener('change', function() {
+            const questionId = this.dataset.question;
+            const navBtn = document.querySelector(`[data-question="${questionId}"]`);
+            if (navBtn) {
+                navBtn.classList.add('answered');
+            }
+        });
+    });
+
+    // Навигация
+    document.getElementById('prev-btn').addEventListener('click', function() {
+        if (currentQuestion > 0) {
+            currentQuestion--;
+            showQuestion(currentQuestion);
+        }
+    });
+
+    document.getElementById('next-btn').addEventListener('click', function() {
+        if (currentQuestion < questions - 1) {
+            currentQuestion++;
+            showQuestion(currentQuestion);
+        }
+    });
+
+    // Клики по номерам вопросов
+    document.querySelectorAll('.question-nav-btn').forEach((btn, index) => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            currentQuestion = index;
+            showQuestion(currentQuestion);
+        });
+    });
+
+    // Таймер
+    {% if timer_seconds %}
+    let timeLeft = {{ timer_seconds }};
+    const timerDisplay = document.getElementById('timer-display');
+    const timerElement = document.getElementById('timer');
+
+    function updateTimer() {
+        const minutes = Math.floor(timeLeft / 60);
+        const seconds = timeLeft % 60;
+        timerDisplay.textContent = `Осталось: ${minutes}:${seconds.toString().padStart(2, '0')}`;
+
+        if (timeLeft <= 60) {
+            timerElement.classList.add('warning');
+        }
+        if (timeLeft <= 0) {
+            timerElement.classList.add('danger');
+            document.querySelector('form').submit();
+            return;
+        }
+
+        timeLeft--;
+        setTimeout(updateTimer, 1000);
+    }
+
+    updateTimer();
+    {% endif %}
+
+    // Показываем первый вопрос при загрузке
+    showQuestion(0);
+</script>
+{% endblock %}

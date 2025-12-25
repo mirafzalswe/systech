@@ -1,0 +1,153 @@
+{% extends "test_pr/base.html" %}
+
+{% block title %}Конструктор тестов - Админ{% endblock %}
+
+{% block content %}
+<div style="padding: 40px 0;">
+    <div class="card" style="margin-bottom: 30px;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h1 style="margin-bottom: 10px;">Конструктор тестов</h1>
+                <p style="color: var(--dark-gray); margin: 0;">
+                    Управление тестами и вопросами
+                </p>
+            </div>
+            <a href="{% url 'admin_create_test' %}" class="btn btn-primary" style="font-size: 1.1rem;">
+                + Создать новый тест
+            </a>
+        </div>
+    </div>
+
+    {% if tests %}
+    <div style="display: grid; gap: 20px;">
+        {% for test in tests %}
+        <div class="card" style="border-left: 4px solid {% if test.status == 'active' %}#10b981{% elif test.status == 'draft' %}#f59e0b{% else %}#6b7280{% endif %};">
+            <div style="display: flex; justify-content: space-between; align-items: start; gap: 20px;">
+                <div style="flex: 1;">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                        <h3 style="margin: 0;">{{ test.title }}</h3>
+                        <span style="background-color: {% if test.status == 'active' %}#10b981{% elif test.status == 'draft' %}#f59e0b{% else %}#6b7280{% endif %}; color: white; padding: 4px 12px; border-radius: 12px; font-size: 11px; font-weight: 600;">
+                            {% if test.status == 'active' %}Активен{% elif test.status == 'draft' %}Черновик{% else %}Неактивен{% endif %}
+                        </span>
+                    </div>
+                    
+                    {% if test.description %}
+                    <p style="color: var(--dark-gray); margin-bottom: 15px;">{{ test.description|truncatewords:30 }}</p>
+                    {% endif %}
+                    
+                    <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+                        <span style="color: var(--dark-gray); font-size: 0.9rem;">
+                            Вопросов: <strong style="color: {% if test.questions.count >= 5 %}#10b981{% elif test.questions.count >= 1 %}#f59e0b{% else %}#ef4444{% endif %};">{{ test.questions.count }}</strong>
+                        </span>
+                        
+                        {% if test.timer_minutes %}
+                        <span style="color: var(--dark-gray); font-size: 0.9rem;">
+                            Время: <strong>{{ test.timer_minutes }} мин</strong>
+                        </span>
+                        {% endif %}
+                        
+                        <span style="color: var(--dark-gray); font-size: 0.9rem;">
+                            Создан: {{ test.created_at|date:"d.m.Y H:i" }}
+                        </span>
+                    </div>
+                </div>
+                
+                <div style="display: flex; gap: 10px;">
+                    <a href="{% url 'admin_edit_test' test.id %}" class="btn btn-primary">
+                        Редактировать
+                    </a>
+                    <button onclick="duplicateTest({{ test.id }})" class="btn btn-secondary" style="background: var(--success-color);">
+                        Дублировать
+                    </button>
+                    <button onclick="deleteTest({{ test.id }}, '{{ test.title|escapejs }}')" class="btn btn-danger">
+                        Удалить
+                    </button>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="card" style="text-align: center; padding: 60px 20px;">
+        <h2 style="color: var(--dark-gray); margin-bottom: 20px;">Нет тестов</h2>
+        <p style="color: var(--dark-gray); margin-bottom: 30px;">
+            Создайте первый тест с помощью конструктора
+        </p>
+        <a href="{% url 'admin_create_test' %}" class="btn btn-primary" style="font-size: 1.1rem;">
+            + Создать тест
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+function duplicateTest(testId) {
+    if (!confirm('Вы уверены, что хотите дублировать этот тест?')) {
+        return;
+    }
+    
+    fetch(`/admin-builder/${testId}/duplicate/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            window.location.reload();
+        } else {
+            alert('Ошибка: ' + data.error);
+        }
+    })
+    .catch(error => {
+        alert('Произошла ошибка при дублировании теста');
+        console.error(error);
+    });
+}
+
+function deleteTest(testId, testTitle) {
+    if (!confirm(`Вы уверены, что хотите удалить тест "${testTitle}"?\n\nЭто действие нельзя отменить!`)) {
+        return;
+    }
+    
+    fetch(`/admin-builder/${testId}/delete/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            window.location.reload();
+        } else {
+            alert('Ошибка: ' + data.error);
+        }
+    })
+    .catch(error => {
+        alert('Произошла ошибка при удалении теста');
+        console.error(error);
+    });
+}
+</script>
+{% endblock %}

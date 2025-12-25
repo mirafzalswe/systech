@@ -1,0 +1,317 @@
+{% extends "test_pr/base.html" %}
+
+{% block title %}Создать тест - Админ{% endblock %}
+
+{% block content %}
+<div style="padding: 40px 0;">
+    <div class="card" style="margin-bottom: 30px;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h1>Создание нового теста</h1>
+                <p style="color: var(--dark-gray); margin: 10px 0 0 0;">
+                    Заполните информацию о тесте и добавьте вопросы
+                </p>
+            </div>
+            <a href="{% url 'admin_test_builder' %}" class="btn btn-secondary">
+                Отмена
+            </a>
+        </div>
+    </div>
+
+    <form id="test-form">
+        {% csrf_token %}
+        
+        <!-- Основная информация о тесте -->
+        <div class="card">
+            <h2>Основная информация</h2>
+            
+            <div class="form-group">
+                <label for="{{ form.title.id_for_label }}">{{ form.title.label }} *</label>
+                {{ form.title }}
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.description.id_for_label }}">{{ form.description.label }}</label>
+                {{ form.description }}
+            </div>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                <div class="form-group">
+                    <label for="{{ form.status.id_for_label }}">{{ form.status.label }}</label>
+                    {{ form.status }}
+                </div>
+                
+                <div class="form-group">
+                    <label for="{{ form.timer_minutes.id_for_label }}">{{ form.timer_minutes.label }}</label>
+                    {{ form.timer_minutes }}
+                </div>
+                
+                <div class="form-group">
+                    <label for="{{ form.show_answers.id_for_label }}">{{ form.show_answers.label }}</label>
+                    {{ form.show_answers }}
+                </div>
+                
+                <div class="form-group">
+                    <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                        {{ form.show_result }}
+                        <span>{{ form.show_result.label }}</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Вопросы -->
+        <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2 style="margin: 0;">Вопросы</h2>
+                <button type="button" onclick="addQuestion()" class="btn btn-success">
+                    + Добавить вопрос
+                </button>
+            </div>
+            
+            <div id="questions-container"></div>
+            
+            <div id="no-questions" style="text-align: center; padding: 40px 20px; color: var(--dark-gray);">
+                <p>Нет вопросов. Нажмите "Добавить вопрос" чтобы начать.</p>
+            </div>
+        </div>
+
+        <!-- Кнопки сохранения -->
+        <div class="card">
+            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                <a href="{% url 'admin_test_builder' %}" class="btn btn-secondary">
+                    Отмена
+                </a>
+                <button type="submit" class="btn btn-primary" style="min-width: 200px;">
+                    Сохранить тест
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<style>
+.question-card {
+    border: 2px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: 20px;
+    margin-bottom: 20px;
+    background: #f8fafc;
+}
+
+.question-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.answer-item {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+    align-items: center;
+}
+
+.form-control {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid var(--border-color);
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    font-family: inherit;
+    transition: var(--transition);
+    background-color: white;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+textarea.form-control {
+    resize: vertical;
+}
+</style>
+
+<script>
+let questionCounter = 0;
+
+function addQuestion() {
+    questionCounter++;
+    const container = document.getElementById('questions-container');
+    document.getElementById('no-questions').style.display = 'none';
+    
+    const questionDiv = document.createElement('div');
+    questionDiv.className = 'question-card';
+    questionDiv.id = `question-${questionCounter}`;
+    questionDiv.innerHTML = `
+        <div class="question-header">
+            <h3 style="margin: 0;">Вопрос ${questionCounter}</h3>
+            <button type="button" onclick="removeQuestion(${questionCounter})" class="btn btn-danger" style="padding: 8px 16px;">
+                Удалить вопрос
+            </button>
+        </div>
+        
+        <div class="form-group">
+            <label>Текст вопроса *</label>
+            <textarea class="form-control question-text" rows="3" placeholder="Введите текст вопроса" required></textarea>
+        </div>
+        
+        <div class="form-group">
+            <label>Порядок</label>
+            <input type="number" class="form-control question-order" value="${questionCounter - 1}" min="0">
+        </div>
+        
+        <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border-color);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <strong>Варианты ответов</strong>
+                <button type="button" onclick="addAnswer(${questionCounter})" class="btn btn-success" style="padding: 6px 12px; font-size: 0.9rem;">
+                    + Добавить вариант
+                </button>
+            </div>
+            <div class="answers-container" id="answers-${questionCounter}"></div>
+        </div>
+    `;
+    
+    container.appendChild(questionDiv);
+    
+    // Добавляем 4 варианта ответа по умолчанию
+    for (let i = 0; i < 4; i++) {
+        addAnswer(questionCounter);
+    }
+}
+
+function removeQuestion(questionId) {
+    if (confirm('Удалить этот вопрос?')) {
+        document.getElementById(`question-${questionId}`).remove();
+        
+        const container = document.getElementById('questions-container');
+        if (container.children.length === 0) {
+            document.getElementById('no-questions').style.display = 'block';
+        }
+    }
+}
+
+function addAnswer(questionId) {
+    const container = document.getElementById(`answers-${questionId}`);
+    const answerIndex = container.children.length;
+    
+    const answerDiv = document.createElement('div');
+    answerDiv.className = 'answer-item';
+    answerDiv.innerHTML = `
+        <input type="text" class="form-control answer-text" placeholder="Вариант ответа" required style="flex: 1;">
+        <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; white-space: nowrap;">
+            <input type="checkbox" class="form-check-input answer-correct" style="margin: 0;">
+            <span>Верно</span>
+        </label>
+        <input type="number" class="form-control answer-order" value="${answerIndex}" min="0" style="width: 80px;">
+        <button type="button" onclick="this.parentElement.remove()" class="btn btn-danger" style="padding: 8px 12px;">
+            ×
+        </button>
+    `;
+    
+    container.appendChild(answerDiv);
+}
+
+document.getElementById('test-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    
+    // Собираем данные о вопросах
+    const questionsData = [];
+    const questionCards = document.querySelectorAll('.question-card');
+    
+    if (questionCards.length === 0) {
+        alert('Добавьте хотя бы один вопрос!');
+        return;
+    }
+    
+    for (const card of questionCards) {
+        const questionText = card.querySelector('.question-text').value.trim();
+        const questionOrder = card.querySelector('.question-order').value;
+        
+        if (!questionText) {
+            alert('Заполните текст всех вопросов!');
+            return;
+        }
+        
+        // Собираем ответы для этого вопроса
+        const answers = [];
+        const answerItems = card.querySelectorAll('.answer-item');
+        
+        if (answerItems.length === 0) {
+            alert('Добавьте хотя бы один вариант ответа для каждого вопроса!');
+            return;
+        }
+        
+        if (answerItems.length < 2) {
+            alert('Каждый вопрос должен иметь минимум 2 варианта ответа!');
+            return;
+        }
+        
+        let hasCorrectAnswer = false;
+        
+        for (const answerItem of answerItems) {
+            const answerText = answerItem.querySelector('.answer-text').value.trim();
+            const isCorrect = answerItem.querySelector('.answer-correct').checked;
+            const answerOrder = answerItem.querySelector('.answer-order').value;
+            
+            if (!answerText) {
+                alert('Заполните текст всех вариантов ответа!');
+                return;
+            }
+            
+            if (isCorrect) {
+                hasCorrectAnswer = true;
+            }
+            
+            answers.push({
+                text: answerText,
+                is_correct: isCorrect,
+                order: parseInt(answerOrder)
+            });
+        }
+        
+        if (!hasCorrectAnswer) {
+            alert('Отметьте правильный ответ для каждого вопроса!');
+            return;
+        }
+        
+        questionsData.push({
+            text: questionText,
+            order: parseInt(questionOrder),
+            answers: answers
+        });
+    }
+    
+    formData.append('questions_data', JSON.stringify(questionsData));
+    
+    try {
+        const response = await fetch('', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            alert('Тест успешно создан!');
+            window.location.href = data.redirect_url || '{% url "admin_test_builder" %}';
+        } else {
+            alert('Ошибка: ' + (data.error || JSON.stringify(data.errors)));
+        }
+    } catch (error) {
+        alert('Произошла ошибка при сохранении теста');
+        console.error(error);
+    }
+});
+
+// Добавляем первый вопрос автоматически
+addQuestion();
+</script>
+{% endblock %}

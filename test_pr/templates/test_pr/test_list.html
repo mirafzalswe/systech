@@ -1,0 +1,89 @@
+{% extends 'test_pr/base.html' %}
+
+{% block title %}Выбор теста - Онлайн Тесты{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 40px;">
+    <div class="card">
+        <h1>Добро пожаловать, {{ participant.first_name }}!</h1>
+        <p style="color: var(--dark-gray); font-size: 1.1rem;">
+            Выберите тест для прохождения:
+        </p>
+    </div>
+
+    {% if not tests %}
+    <div class="card">
+        <div style="text-align: center; padding: 40px 0;">
+            <h2 style="color: var(--dark-gray);">Нет доступных тестов</h2>
+            <p style="margin-top: 10px; color: var(--dark-gray);">
+                В данный момент нет активных тестов. Пожалуйста, попробуйте позже.
+            </p>
+        </div>
+    </div>
+    {% else %}
+    <div style="margin-bottom: 40px;">
+        <h2 style="margin-bottom: 20px;">Доступные тесты</h2>
+
+        <ul class="test-list">
+            {% for test in tests %}
+            <li class="test-item">
+                <div class="test-item-info" style="flex: 1;">
+                    <h3 style="margin-bottom: 8px;">{{ test.title }}</h3>
+
+                    {% if test.description %}
+                    <p class="test-item-desc">{{ test.description }}</p>
+                    {% endif %}
+
+                    <div style="margin-top: 10px; display: flex; gap: 15px; flex-wrap: wrap;">
+                        <span style="color: var(--dark-gray); font-size: 0.9rem;">
+                            Вопросов: <strong>{{ test.questions.count }}</strong>
+                        </span>
+
+                        {% if test.timer_minutes %}
+                        <span style="color: var(--dark-gray); font-size: 0.9rem;">
+                            Время: <strong>{{ test.timer_minutes }} минут</strong>
+                        </span>
+                        {% else %}
+                        <span style="color: var(--dark-gray); font-size: 0.9rem;">
+                            Время: <strong>Не ограничено</strong>
+                        </span>
+                        {% endif %}
+                    </div>
+
+                    {% if test.id in completed_tests %}
+                    <span class="test-item-status completed">Пройден</span>
+                    {% else %}
+                    <span class="test-item-status available">Доступен</span>
+                    {% endif %}
+                </div>
+
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    {% if test.id in completed_tests %}
+                    <button class="btn btn-secondary" disabled>
+                        Уже пройден
+                    </button>
+                    {% else %}
+                    <a href="{% url 'take_test' test.id %}" class="btn btn-primary">
+                        Начать тест
+                    </a>
+                    {% endif %}
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    <!-- Информационная секция -->
+    <div class="card" style="background-color: #f8f9fa;">
+        <h3>Как пройти тест?</h3>
+        <ol style="margin-left: 20px; line-height: 2;">
+            <li>Выберите интересующий вас тест</li>
+            <li>Нажмите кнопку "Начать"</li>
+            <li>Ответьте на все вопросы (вы можете пропускать вопросы и возвращаться к ним)</li>
+            <li>Нажмите "Завершить тест"</li>
+            <li>Получите результаты и расшифровку правильных ответов</li>
+        </ol>
+    </div>
+</div>
+{% endblock %}
