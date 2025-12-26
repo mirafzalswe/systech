@@ -1,0 +1,18 @@
+# .gitignore
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.venv/
+db.sqlite3
+*.log
+.env
+.DS_Store
+staticfiles/
+*.md
+!README.md
+!VERCEL_ENV.md

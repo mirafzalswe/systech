@@ -27,4 +27,13 @@ local_settings.py
 .env
 .venv
 .DS_Store
-*.md
+# Исключаем только документацию, оставляем важные файлы
+QUICKSTART.md
+FAQ.md
+FILES.md
+ADMIN_GUIDE.md
+ADMIN_IMPROVEMENTS.md
+COMPLETION_SUMMARY.md
+DOCUMENTATION.md
+PROJECT_STATUS.md
+SETUP.md
