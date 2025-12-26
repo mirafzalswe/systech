@@ -1,0 +1,249 @@
+/* Кастомные стили для админ-панели Django */
+
+/* Улучшенные inline формы */
+.inline-group {
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 20px;
+    background: #f8fafc;
+}
+
+.inline-group h2 {
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    color: white;
+    padding: 12px 20px;
+    margin: -15px -15px 15px -15px;
+    border-radius: 6px 6px 0 0;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+/* Улучшенные кнопки */
+.submit-row input[type="submit"],
+.button,
+input[type="submit"].default {
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    border: none;
+    padding: 12px 24px;
+    border-radius: 6px;
+    font-weight: 600;
+    transition: all 0.2s;
+    box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
+}
+
+.submit-row input[type="submit"]:hover,
+.button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+/* Улучшенные поля формы */
+input[type="text"],
+input[type="number"],
+input[type="email"],
+textarea,
+select {
+    border: 2px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 10px 12px;
+    transition: all 0.2s;
+}
+
+input[type="text"]:focus,
+input[type="number"]:focus,
+textarea:focus,
+select:focus {
+    border-color: #2563eb;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+/* Улучшенные чекбоксы */
+input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+
+/* Красивая таблица результатов */
+.results table {
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.results thead th {
+    background: #1e293b;
+    color: white;
+    font-weight: 600;
+    padding: 12px 15px;
+}
+
+.results tbody tr:hover {
+    background-color: #f1f5f9;
+}
+
+/* Улучшенные фильтры */
+#changelist-filter {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 15px;
+}
+
+#changelist-filter h2 {
+    background: #1e293b;
+    color: white;
+    margin: -15px -15px 15px -15px;
+    padding: 12px 15px;
+    border-radius: 6px 6px 0 0;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+/* Улучшенные action кнопки */
+.actions select {
+    border: 2px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 8px 12px;
+}
+
+.actions button[type="submit"] {
+    background: #10b981;
+    color: white;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.actions button[type="submit"]:hover {
+    background: #059669;
+    transform: translateY(-1px);
+}
+
+/* Улучшенные breadcrumbs */
+.breadcrumbs {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 12px 20px;
+    font-size: 13px;
+}
+
+.breadcrumbs a {
+    color: #2563eb;
+    font-weight: 500;
+}
+
+/* Улучшенные сообщения */
+.messagelist li {
+    border-radius: 6px;
+    padding: 12px 20px;
+    font-weight: 500;
+}
+
+.messagelist .success {
+    background: #d5f4e6;
+    color: #10b981;
+    border-left: 4px solid #10b981;
+}
+
+.messagelist .error {
+    background: #fadbd8;
+    color: #ef4444;
+    border-left: 4px solid #ef4444;
+}
+
+/* Улучшенные inline кнопки добавления */
+.add-row a {
+    background: #10b981;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 600;
+    display: inline-block;
+    transition: all 0.2s;
+}
+
+.add-row a:hover {
+    background: #059669;
+    transform: translateY(-1px);
+}
+
+/* Стили для табличных inline */
+.tabular.inline-related tbody tr {
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.tabular.inline-related tbody tr:hover {
+    background: #f8fafc;
+}
+
+/* Улучшенное отображение help текста */
+.help {
+    color: #64748b;
+    font-size: 12px;
+    margin-top: 5px;
+    font-style: italic;
+}
+
+/* Fieldset с красивой границей */
+fieldset.module {
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+fieldset.module h2 {
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+    color: white;
+    margin: -20px -20px 15px -20px;
+    padding: 12px 20px;
+    border-radius: 6px 6px 0 0;
+    font-size: 14px;
+}
+
+/* Collapsed fieldsets */
+fieldset.collapsed {
+    border-color: #cbd5e1;
+}
+
+fieldset.collapsed h2 {
+    background: #cbd5e1;
+    color: #475569;
+}
+
+/* Pagination */
+.paginator {
+    font-size: 13px;
+    padding: 10px;
+    color: #64748b;
+}
+
+.paginator a {
+    padding: 6px 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    color: #2563eb;
+    text-decoration: none;
+    margin: 0 2px;
+    transition: all 0.2s;
+}
+
+.paginator a:hover {
+    background: #2563eb;
+    color: white;
+}
+
+/* Удобный отступ для сохранения вверху */
+.submit-row {
+    margin-top: 20px;
+    padding: 15px 0;
+    border-top: 2px solid #e2e8f0;
+}
