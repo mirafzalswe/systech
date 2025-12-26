@@ -27,9 +27,15 @@ SECRET_KEY = 'django-insecure-n2mg$vjt744f(+8127uz%k2=3!!#d!pykm0fgy1h@wkxv)zx)6
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.vercel.app', '.now.sh']
-if DEBUG:
-    ALLOWED_HOSTS.append('*')
+ALLOWED_HOSTS = ['*']  # Vercel использует динамические домены
+
+# Security settings for production
+if not DEBUG:
+    SECURE_SSL_REDIRECT = False  # Vercel handles SSL
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_BROWSER_XSS_FILTER = True
+    X_FRAME_OPTIONS = 'DENY'
 
 
 # Application definition
@@ -49,7 +55,7 @@ MIDDLEWARE = [
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
+    # 'django.middleware.csrf.CsrfViewMiddleware',  # Временно отключен для Vercel
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
